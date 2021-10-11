@@ -51,7 +51,7 @@ class CallSignsNotifier:
         msg = MIMEText(body)
         msg["Subject"] = subject
         msg["From"] = EMAIL_HOST_USER
-        msg["To"] = receipient
+        msg["To"] = recipient
 
         s.sendmail(msg["From"], msg["To"], msg.as_string())
 
@@ -100,6 +100,9 @@ class CallSignsNotifier:
                 raise e
 
 
-if __name__ == "__main__":
-
+def main():
     CallSignsNotifier(NumberOfLetters.THREE.value, recipient=EMAIL_RECIPTIENT)
+
+
+if __name__ == "__main__":
+    main()

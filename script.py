@@ -33,19 +33,20 @@ class CallSignsNotifier:
         callsigns: list,
         number_of_letters: NumberOfLetters,
         time: datetime,
-        recipient=recipient,
+        recipient: str,
     ) -> None:
         delimited_signs = "\n".join([f"* {callsign}" for callsign in callsigns])
+        formatted_time = time.strftime("%A %B %d, %Y at %I:%M%p")
+
         body = (
             f"Hi Amin, as you requested, there may be {number_of_letters}-letter callsign available. "
-            f"Your options on {time} are:\n{delimited_signs}"
+            f"Your options on {formatted_time} are:\n{delimited_signs}"
         )
-
-        print(body)
 
         s = smtplib.SMTP("smtp.mailgun.org", 587)
         s.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-        subject = f"{number_of_letters}-letter callsigns available on {time}!"
+        short_date = time.strftime("%d/%m/%y")
+        subject = f"{number_of_letters}-letter callsigns available on {short_date}!"
 
         msg = MIMEText(body)
         msg["Subject"] = subject
@@ -80,7 +81,7 @@ class CallSignsNotifier:
         ]
         return callsigns
 
-    def __init__(self, number_of_letters: NumberOfLetters, recipient=recipient) -> None:
+    def __init__(self, number_of_letters: NumberOfLetters, recipient: str) -> None:
         results_page = self._get_iesd_results_page(number_of_letters)
         callsigns = None
         try:

@@ -9,11 +9,13 @@ from os import environ
 ENDPOINT = "https://apc-cap.ic.gc.ca/pls/apc_anon/query_avail_cs$callsign.actionquery"
 EMAIL_HOST = "smtp.mailgun.org"
 EMAIL_PORT = 465
-EMAIL_HOST_USER = environ['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = environ['EMAIL_HOST_PASSWORD']
+EMAIL_HOST_USER = environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
 TIMEZONE = pytz.timezone("America/Toronto")
+
+EMAIL_RECIPTIENT = "ve3hmm@gilani.me"
 
 import smtplib
 
@@ -27,7 +29,11 @@ class NumberOfLetters(Enum):
 
 class CallSignsNotifier:
     def _send_email(
-        self, callsigns: list, number_of_letters: NumberOfLetters, time: datetime
+        self,
+        callsigns: list,
+        number_of_letters: NumberOfLetters,
+        time: datetime,
+        recipient=recipient,
     ) -> None:
         delimited_signs = "\n".join([f"* {callsign}" for callsign in callsigns])
         body = (
@@ -44,7 +50,7 @@ class CallSignsNotifier:
         msg = MIMEText(body)
         msg["Subject"] = subject
         msg["From"] = EMAIL_HOST_USER
-        msg["To"] = "ve3hmm@gilani.me"
+        msg["To"] = receipient
 
         s.sendmail(msg["From"], msg["To"], msg.as_string())
 
@@ -74,13 +80,18 @@ class CallSignsNotifier:
         ]
         return callsigns
 
-    def __init__(self, number_of_letters: NumberOfLetters) -> None:
+    def __init__(self, number_of_letters: NumberOfLetters, recipient=recipient) -> None:
         results_page = self._get_iesd_results_page(number_of_letters)
         callsigns = None
         try:
             callsigns = self._results_page_to_callsigns(results_page)
 
-            self._send_email(callsigns, number_of_letters, time=datetime.now(TIMEZONE))
+            self._send_email(
+                callsigns,
+                number_of_letters=number_of_letters,
+                time=datetime.now(TIMEZONE),
+                recipient=recipient,
+            )
         except ValueError as e:
             if "No tables found" in f"{e}":
                 print("No callsigns available")
@@ -90,4 +101,4 @@ class CallSignsNotifier:
 
 if __name__ == "__main__":
 
-    CallSignsNotifier(NumberOfLetters.THREE.value)
+    CallSignsNotifier(NumberOfLetters.THREE.value, recipient=EMAIL_RECIPTIENT)

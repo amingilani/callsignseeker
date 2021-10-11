@@ -101,7 +101,7 @@ class CallSignsNotifier:
 
 
 def main():
-    CallSignsNotifier(NumberOfLetters.THREE.value, recipient=EMAIL_RECIPTIENT)
+    CallSignsNotifier(NumberOfLetters.TWO.value, recipient=EMAIL_RECIPTIENT)
 
 
 if __name__ == "__main__":

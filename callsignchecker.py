@@ -27,6 +27,11 @@ class NumberOfLetters(Enum):
     THREE = "3"
 
 
+class Prefix(Enum):
+    VE3 = "VE3"
+    VA3 = "VA3"
+
+
 class CallSignsNotifier:
     def _send_email(
         self,
@@ -57,9 +62,11 @@ class CallSignsNotifier:
 
         s.quit()
 
-    def _get_iesd_results_page(self, number_of_letters: NumberOfLetters) -> str:
+    def _get_iesd_results_page(
+        self, prefix: Prefix, number_of_letters: NumberOfLetters
+    ) -> str:
         data = {
-            "P_PREFIX_U": "VE3",
+            "P_PREFIX_U": prefix,
             "P_SUFFIX_CHAR_1_U": "%",
             "P_SUFFIX_CHAR_2_U": "%",
             "P_SUFFIX_CHAR_3_U": "%",
@@ -81,8 +88,13 @@ class CallSignsNotifier:
         ]
         return callsigns
 
-    def __init__(self, number_of_letters: NumberOfLetters, recipient: str) -> None:
-        results_page = self._get_iesd_results_page(number_of_letters)
+    def __init__(
+        self, prefix: Prefix, number_of_letters: NumberOfLetters, recipient: str
+    ) -> None:
+        results_page = self._get_iesd_results_page(
+            prefix=prefix,
+            number_of_letters=number_of_letters,
+        )
         callsigns = None
         try:
             callsigns = self._results_page_to_callsigns(results_page)
@@ -101,7 +113,16 @@ class CallSignsNotifier:
 
 
 def main():
-    CallSignsNotifier(NumberOfLetters.TWO.value, recipient=EMAIL_RECIPTIENT)
+    CallSignsNotifier(
+        prefix=Prefix.VE3.value,
+        number_of_letters=NumberOfLetters.TWO.value,
+        recipient=EMAIL_RECIPTIENT,
+    )
+    CallSignsNotifier(
+        prefix=Prefix.VA3.value,
+        number_of_letters=NumberOfLetters.TWO.value,
+        recipient=EMAIL_RECIPTIENT,
+    )
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
-import requests
-import pandas as pd
-from enum import Enum
-import pytz
 from datetime import datetime
+from enum import Enum
 from os import environ
 
+import pandas as pd
+import pytz
+import requests
 
 ENDPOINT = "https://apc-cap.ic.gc.ca/pls/apc_anon/query_avail_cs$callsign.actionquery"
 EMAIL_HOST = "smtp.mailgun.org"
@@ -15,10 +15,12 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
 TIMEZONE = pytz.timezone("America/Toronto")
 
-EMAIL_RECIPTIENT = "ve3hmm@gilani.me"
+EMAIL_RECIPTIENTS = (
+    ["Amin", "ve3hmm@gilani.me"],
+    ["Chris", "ve3rwj@winsystem.org"],
+)
 
 import smtplib
-
 from email.mime.text import MIMEText
 
 
@@ -39,12 +41,13 @@ class CallSignsNotifier:
         number_of_letters: NumberOfLetters,
         time: datetime,
         recipient: str,
+        recipient_first_name: str,
     ) -> None:
         delimited_signs = "\n".join([f"* {callsign}" for callsign in callsigns])
         formatted_time = time.strftime("%A %B %d, %Y at %I:%M%p")
 
         body = (
-            f"Hi Amin, as you requested, there may be {number_of_letters}-letter callsign available. "
+            f"Hi {recipient_first_name}, as you requested, there may be {number_of_letters}-letter callsign available. "
             f"Your options on {formatted_time} are:\n{delimited_signs}"
         )
 
@@ -89,7 +92,11 @@ class CallSignsNotifier:
         return callsigns
 
     def __init__(
-        self, prefix: Prefix, number_of_letters: NumberOfLetters, recipient: str
+        self,
+        prefix: Prefix,
+        number_of_letters: NumberOfLetters,
+        recipient: str,
+        recipient_first_name: str,
     ) -> None:
         results_page = self._get_iesd_results_page(
             prefix=prefix,
@@ -104,6 +111,7 @@ class CallSignsNotifier:
                 number_of_letters=number_of_letters,
                 time=datetime.now(TIMEZONE),
                 recipient=recipient,
+                recipient_first_name=recipient_first_name,
             )
         except ValueError as e:
             if "No tables found" in f"{e}":
@@ -113,16 +121,19 @@ class CallSignsNotifier:
 
 
 def main():
-    CallSignsNotifier(
-        prefix=Prefix.VE3.value,
-        number_of_letters=NumberOfLetters.TWO.value,
-        recipient=EMAIL_RECIPTIENT,
-    )
-    CallSignsNotifier(
-        prefix=Prefix.VA3.value,
-        number_of_letters=NumberOfLetters.TWO.value,
-        recipient=EMAIL_RECIPTIENT,
-    )
+    for recipient_first_name, recipient_mail in EMAIL_RECIPTIENTS:
+        CallSignsNotifier(
+            prefix=Prefix.VE3.value,
+            number_of_letters=NumberOfLetters.TWO.value,
+            recipient=recipient_mail,
+            recipient_first_name=recipient_first_name,
+        )
+        CallSignsNotifier(
+            prefix=Prefix.VA3.value,
+            number_of_letters=NumberOfLetters.TWO.value,
+            recipient=recipient_mail,
+            recipient_first_name=recipient_first_name,
+        )
 
 
 if __name__ == "__main__":

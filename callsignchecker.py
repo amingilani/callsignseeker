@@ -48,7 +48,10 @@ class CallSignsNotifier:
 
         body = (
             f"Hi {recipient_first_name}, as you requested, there may be {number_of_letters}-letter callsign available. "
-            f"Your options on {formatted_time} are:\n{delimited_signs}"
+            f"Your options on {formatted_time} are:\n{delimited_signs}\n"
+            "Let me know if this was helpful by replying to this email\n"
+            "73\n"
+            "VE3HMM"
         )
 
         s = smtplib.SMTP("smtp.mailgun.org", 587)
